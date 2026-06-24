@@ -1,4 +1,3 @@
-# Ai-broxi
 import streamlit as st
 import urllib.parse
 import re
@@ -18,7 +17,7 @@ def proses_ai_web(perintah_asli):
     perintah = perintah_asli.lower().strip()
     respon_ai, redirect_url = "", None
 
-    # 📱 1. UPGRADE FITUR: BUKA APLIKASI LEBIH LUAS TANPA BATAS
+    # 📱 1. FITUR: BUKA APLIKASI LEBIH LUAS TANPA BATAS
     if perintah.startswith("buka "):
         aplikasi = perintah.replace("buka ", "").strip()
         
@@ -49,11 +48,8 @@ def proses_ai_web(perintah_asli):
             respon_ai, redirect_url = "Membuka Instagram, selamat liat-liat story ato reels bro!", "instagram://app"
         elif aplikasi == "facebook":
             respon_ai, redirect_url = "Membuka Facebook buat kamu bro.", "fb://"
-            
-        # PENCARIAN & DETEKSI OTOMATIS APLIKASI LAIN SECARA LUAS (Sistem Pintar Baru)
         else:
             respon_ai = f"Gua coba tembus langsung ke aplikasi '{aplikasi}' di HP lu ya bro! Kalau gagal langsung kebuka, tombol di bawah bakal otomatis ngarahin lu ke halaman pencarian Play Store / App Store-nya."
-            # Mencoba memicu deep link nama aplikasi secara langsung, jika tidak bisa akan lari ke pencarian Google Store
             redirect_url = f"{aplikasi}://"
 
     # 🟢 2. FITUR KIRIM WHATSAPP AMAN
@@ -88,37 +84,30 @@ def proses_ai_web(perintah_asli):
         except:
             respon_ai = "Format hitungannya ngaco tuh bro. Pastiin lu cuma pake angka ama simbol tambah (+), kurang (-), kali (*), ato bagi (/) aja!"
 
-    # 🕒 5. UPGRADE FITUR: WAKTU LENGKAP (HARI, TANGGAL, BULAN, TAHUN, JAM)
-    elif any(x in perintah for x in ["jam berapa", "menit berapa", "waktu sekarang", "hari apa", "tanggal berapa", "tahun berapa"]):
+    # 🕒 4. FITUR: WAKTU LENGKAP INDONESIA (JAM, HARI, TANGGAL, BULAN, TAHUN)
+    elif any(x in perintah for x in ["jam berapa", "menit berapa", "waktu sekarang", "hari apa", "tanggal berapa", "tahun berapa", "bulan apa"]):
         waktu_wib = datetime.utcnow() + timedelta(hours=7)
-        
-        # Konversi nama hari ke bahasa Indonesia santai
         hari_list = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"]
         hari_ini = hari_list[waktu_wib.weekday()]
-        
-        # Konversi nama bulan ke bahasa Indonesia
         bulan_list = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"]
         bulan_ini = bulan_list[waktu_wib.month - 1]
-        
         tgl = waktu_wib.strftime("%d")
         thn = waktu_wib.strftime("%Y")
         jam = waktu_wib.strftime("%H:%M")
-        
         respon_ai = f"Hari ini itu hari *{hari_ini}*, tanggal *{tgl} {bulan_ini} {thn}*. Nah kalau buat jamnya, sekarang udah menunjukkan pukul *{jam} WIB* bro. Lengkap kan kalender dari gua? Hehe."
 
-    # 📜 6. FITUR BARU: BELAJAR SEJARAH SERU & INTERAKTIF
+    # 📜 5. FITUR: BELAJAR SEJARAH SERU
     elif "sejarah" in perintah or perintah.startswith("jelaskan "):
         if "majapahit" in perintah:
-            respon_ai = "Wah, Majapahit itu kerajaan super power abad ke-14 abad kuno di Indonesia bro! Pusatnya di Jawa Timur. Yang paling terkenal itu Patih Gajah Mada dengan 'Sumpah Palapa'-nya. Dia bersumpah gak mau makan enak sebelum berhasil menyatukan seluruh Nusantara (Indonesia, Malaysia, Filipina sekarang). Gokil banget kan sejarah leluhur kita!"
+            respon_ai = "Wah, Majapahit itu kerajaan super power abad ke-14 kuno di Indonesia bro! Pusatnya di Jawa Timur. Yang paling terkenal itu Patih Gajah Mada dengan 'Sumpah Palapa'-nya. Dia bersumpah gak mau makan enak sebelum berhasil menyatukan seluruh Nusantara (Indonesia, Malaysia, Filipina sekarang). Gokil banget kan sejarah leluhur kita!"
         elif "perang dunia" in perintah or "pd" in perintah:
             respon_ai = "Perang Dunia itu sejarah kelam tapi seru buat dipelajari bro. PD 1 (1914) itu gara-gara pangeran Austria ditembak. Kalau PD 2 (1939) itu puncaknya pas aliansi Jerman pimpinan Hitler nyerang Polandia, terus berakhir pas kota Hiroshima-Nagasaki di Jepang dibom atom sama Amerika tahun 1945. Nah, momen itu juga yang dimanfaatin Indonesia buat langsung proklamasi kemerdekaan!"
         elif "soekarno" in perintah or "sukarno" in perintah:
             respon_ai = "Ir. Soekarno atau Bung Karno itu bapak Proklamator sekaligus Presiden pertama kita bro! Beliau itu singa podium, kalau pidato di depan negara asing semua langsung ciut. Bersama Bung Hatta, beliau yang berani bacain teks proklamasi 17 Agustus 1945 pas Jepang lagi kalah perang."
         else:
-            # Petunjuk belajar sejarah secara umum
             respon_ai = "Gass kita belajar sejarah bro! Sejarah itu asyik, bukan cuma ngafalin tahun doang. Lu mau tahu sejarah apa nih? Coba ketik secara spesifik, misalnya: `sejarah majapahit`, `sejarah perang dunia`, atau `siapa soekarno`. Nanti gua ceritain secara detail dan seru!"
 
-    # 🔍 7. FITUR PENCARIAN GOOGLE OTOMATIS
+    # 🔍 6. FITUR PENCARIAN GOOGLE OTOMATIS
     elif perintah.startswith("cari ") or perintah.startswith("apa ") or perintah.startswith("pengen cari "):
         keyword = perintah
         for k in ["pengen cari ", "cari ", "apa "]:
@@ -129,17 +118,12 @@ def proses_ai_web(perintah_asli):
         else: 
             respon_ai = "Mau cari apa di Google bro? Sebutin objek atau kalimatnya dong biar jelas."
 
-    # 🆔 8. IDENTITAS JAWABAN PANJANG & SANTAI
+    # 🆔 7. IDENTITAS JAWABAN PANJANG & SANTAI
     elif perintah in ["lu siapa", "kamu siapa", "siapa kamu"]:
         respon_ai = "Kenalin bro, aku AI Aliy! Program asisten virtual santai yang dibikin pake Python khusus buat bantuin kamu sehari-hari. Tugas utama aku itu ringkas banget: bisa nemenin kamu ngobrol pas gabut, bantuin hitung matematika cepat, otomatis nyariin info apa aja di Google, sampe ngebuka semua jenis aplikasi di HP kamu tinggal sekali klik doang. Mantap kan?"
 
-    # 💬 9. FITUR BARU: CURHATAN & JAWABAN RANDOM VARIATIF (TIDAK ITU-ITU AJA)
+    # 💬 8. FITUR: JAWABAN RANDOM VARIATIF & CURHATAN (FORMAT ANTI-ERROR)
     else:
-        # Kumpulan database jawaban acak (variatif) biar gak bosenin
-        sapaan_list = [
-            "Halo juga bro! Senang banget bisa ketemu dan nyapa kamu lagi hari ini. Ada hal seru apa yang mau kita lakuin bareng hari ini?",
-            "Yo bro! Whatsapp! Ada yang bisa dibantu hari ini? Gua lagi luang banget nih buat nemenin lu.",
-            "Hai bro! Akhirnya lu ngechat gua lagi, hehe. Mau suruh gua ngapain hari ini? Tinggal sebut!"
-        ]
-        kabar_list = [
-            "Kabar sistemku aman terkendali bro, performa lagi kenceng-kencengnya dan siap tempur nemenin aktivitasmu! Kalau kabar kamu sendiri gimana?",
+        # Menyatukan database jawaban dalam format satu baris yang aman dari pemotongan spasi
+        sapaan_list = ["Halo juga bro! Senang banget bisa ketemu dan nyapa kamu lagi hari ini. Ada hal seru apa yang mau kita lakuin bareng hari ini?", "Yo bro! Whatsapp! Ada yang bisa dibantu hari ini? Gua lagi luang banget nih buat nemenin lu.", "Hai bro! Akhirnya lu ngechat gua lagi, hehe. Mau suruh gua ngapain hari ini? Tinggal sebut!"]
+        kabar_list = ["Kabar sistemku aman terkendali bro, performa lagi kenceng-kencengnya dan siap tempur nemenin aktivitasmu! Kalau kabar kamu sendiri gimana?", "Gua sebagai AI selalu mantap bro, server lagi adem dan siap dengerin perintah lu. Semoga lu di sana juga sehat dan banyak duit ya!", "Kabar baik banget bro! Gimana hari-hari lu? Semoga dilancarkan semua urusan lu ya bro."]
