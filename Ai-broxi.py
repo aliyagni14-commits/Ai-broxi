@@ -9,7 +9,6 @@ st.set_page_config(page_title="Asisten AI Aliy", page_icon="🤖", layout="cente
 st.title("🤖 Asisten AI Aliy (Versi Web Big Update)")
 st.write("Woi bro! Selamat datang di AI Aliy yang baru. Di sini lu bisa suruh gua buka aplikasi apa aja, curhat masalah hidup, hitung matematika, tanya kalender lengkap, sampe belajar sejarah bareng. Gass ketik di bawah!")
 
-# Memori riwayat chat biar gak ilang pas di-refresh
 if "riwayat_chat" not in st.session_state:
     st.session_state.riwayat_chat = []
 
@@ -20,7 +19,6 @@ def proses_ai_web(perintah_asli):
     # 📱 1. FITUR: BUKA APLIKASI LEBIH LUAS TANPA BATAS
     if perintah.startswith("buka "):
         aplikasi = perintah.replace("buka ", "").strip()
-        
         if aplikasi == "whatsapp":
             respon_ai, redirect_url = "Siap bro, gass buka WhatsApp!", "https://whatsapp.com"
         elif aplikasi == "google":
@@ -64,9 +62,9 @@ def proses_ai_web(perintah_asli):
                 respon_ai = f"Siap bro! Pesan kamu udah aku siapin buat dikirim ke nomor {nomor_hp}."
                 pesan_encoded = urllib.parse.quote(isi_pesan)
                 redirect_url = f"https://whatsapp.com{nomor_hp}&text={pesan_encoded}"
-            else: 
+            else:
                 respon_ai = "Formatnya salah bro. Yang bener gini contohnya: `kirim wa ke 0812xxx pesan woi mabar`"
-        except: 
+        except:
             respon_ai = "Duh sorry bro, gagal ngeproses nomor WhatsApp-nya. Cek lagi kodenya ya."
 
     # 🧮 3. FITUR KALKULATOR
@@ -83,7 +81,7 @@ def proses_ai_web(perintah_asli):
         except:
             respon_ai = "Format hitungannya ngaco tuh bro. Pastiin lu cuma pake angka ama simbol tambah (+), kurang (-), kali (*), ato bagi (/) aja!"
 
-    # 🕒 4. FITUR WAKTU LENGKAP INDONESIA (JAM, HARI, TANGGAL, BULAN, TAHUN)
+    # 🕒 4. FITUR: WAKTU LENGKAP INDONESIA
     elif any(x in perintah for x in ["jam berapa", "menit berapa", "waktu sekarang", "hari apa", "tanggal berapa", "tahun berapa", "bulan apa"]):
         waktu_wib = datetime.now(timezone.utc) + timedelta(hours=7)
         hari_list = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"]
@@ -95,7 +93,7 @@ def proses_ai_web(perintah_asli):
         jam = waktu_wib.strftime("%H:%M")
         respon_ai = f"Hari ini itu hari *{hari_ini}*, tanggal *{tgl} {bulan_ini} {thn}*. Nah kalau buat jamnya, sekarang udah menunjukkan pukul *{jam} WIB* bro. Lengkap kan kalender dari gua? Hehe."
 
-    # 📜 5. FITUR BELAJAR SEJARAH SERU
+    # 📜 5. FITUR: BELAJAR SEJARAH SERU
     elif "sejarah" in perintah or perintah.startswith("jelaskan "):
         if "majapahit" in perintah:
             respon_ai = "Wah, Majapahit itu kerajaan super power abad ke-14 kuno di Indonesia bro! Pusatnya di Jawa Timur. Yang paling terkenal itu Patih Gajah Mada dengan 'Sumpah Palapa'-nya. Dia bersumpah gak mau makan enak sebelum berhasil menyatukan seluruh Nusantara (Indonesia, Malaysia, Filipina sekarang). Gokil banget kan sejarah leluhur kita!"
@@ -106,10 +104,30 @@ def proses_ai_web(perintah_asli):
         else:
             respon_ai = "Gass kita belajar sejarah bro! Sejarah itu asyik, bukan cuma ngafalin tahun doang. Lu mau tahu sejarah apa nih? Coba ketik secara spesifik, misalnya: `sejarah majapahit`, `sejarah perang dunia`, atau `siapa soekarno`. Nanti gua ceritain secara detail dan seru!"
 
-    # 🔍 6. FITUR PENCARIAN GOOGLE OTOMATIS
+    # 🔍 6. FITUR PENCARIAN GOOGLE OTOMATIS (SISTEM STRIP SUDAH DI-FIX)
     elif perintah.startswith("cari ") or perintah.startswith("apa ") or perintah.startswith("pengen cari "):
         keyword = perintah
-        for k in ["pengen cari ", "cari ", "apa "]:
+        if keyword.startswith("pengen cari "):
+            keyword = keyword.replace("pengen cari ", "", 1).strip()
+        elif keyword.startswith("cari "):
+            keyword = keyword.replace("cari ", "", 1).strip()
+        elif keyword.startswith("apa "):
+            keyword = keyword.replace("apa ", "", 1).strip()
+            
+        if keyword:
+            q_final = "apa " + keyword if perintah.startswith("apa ") else keyword
+            respon_ai, redirect_url = f"Siap bro, aku cariin info tentang '{q_final}' langsung di Google ya!", f"https://google.com/search?q={urllib.parse.quote(q_final)}"
+        else:
+            respon_ai = "Mau cari apa di Google bro? Sebutin objek atau kalimatnya dong biar jelas."
+
+    # 🆔 7. IDENTITAS JAWABAN PANJANG & SANTAI
+    elif perintah in ["lu siapa", "kamu siapa", "siapa kamu"]:
+        respon_ai = "Kenalin bro, aku AI Aliy! Program asisten virtual virtual santai yang dibikin pake Python khusus buat bantuin kamu sehari-hari. Tugas utama aku itu ringkas banget: bisa nemenin kamu ngobrol pas gabut, bantuin hitung matematika cepat, otomatis nyariin info apa aja di Google, sampe ngebuka semua jenis aplikasi di HP kamu tinggal sekali klik doang. Mantap kan?"
+
+    # 💬 8. FITUR: JAWABAN RANDOM VARIATIF & CURHATAN
+    else:
+        sapaan_list = ["Halo juga bro! Senang banget bisa ketemu dan nyapa kamu lagi hari ini. Ada hal seru apa yang mau kita lakuin bareng hari ini?", "Yo bro! Whatsapp! Ada yang bisa dibantu hari ini? Gua lagi luang banget nih buat nemenin lu.", "Hai bro! Akhirnya lu ngechat gua lagi, hehe. Mau suruh gua ngapain hari ini? Tinggal sebut!"]
+        kabar_list = ["Kabar sistemku aman terkendali bro, performa lagi kenceng-kencengnya dan siap tempur nemenin aktivitasmu! Kalau kabar kamu sendiri gimana?", "Gua sebagai AI selalu mantap bro, server lagi adem dan siap dengerin perintah lu. Semoga lu di sana juga sehat dan banyak duit ya!", "Kabar baik banget bro! Gimana hari-hari lu? Semoga dilancarkan semua urusan lu ya bro."]
             if keyword.startswith(k): keyword = keyword.replace(k, "", 1).strip(); break
         if keyword:
             q_final = "apa " + keyword if perintah.startswith("apa ") else keyword
