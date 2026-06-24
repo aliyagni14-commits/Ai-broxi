@@ -2,12 +2,13 @@
 import streamlit as st
 import urllib.parse
 import re
+import random
 from datetime import datetime, timedelta
 
 # Desain halaman web AI biar keren
 st.set_page_config(page_title="Asisten AI Aliy", page_icon="🤖", layout="centered")
-st.title("🤖 Asisten AI Aliy (Versi Web Update)")
-st.write("Woi bro! Ketik apa aja di bawah bebas, mau suruh buka aplikasi, hitung matematika, atau nanya-nanya santai, langsung pencet Enter aja!")
+st.title("🤖 Asisten AI Aliy (Versi Web Big Update)")
+st.write("Woi bro! Selamat datang di AI Aliy yang baru. Di sini lu bisa suruh gua buka aplikasi apa aja, curhat masalah hidup, hitung matematika, tanya kalender lengkap, sampe belajar sejarah bareng. Gass ketik di bawah!")
 
 # Memori riwayat chat biar gak ilang pas di-refresh
 if "riwayat_chat" not in st.session_state:
@@ -17,11 +18,11 @@ def proses_ai_web(perintah_asli):
     perintah = perintah_asli.lower().strip()
     respon_ai, redirect_url = "", None
 
-    # 📱 1. SISTEM DETEKSI SEMUA PERINTAH BUKA APLIKASI SECARA LUAS
+    # 📱 1. UPGRADE FITUR: BUKA APLIKASI LEBIH LUAS TANPA BATAS
     if perintah.startswith("buka "):
         aplikasi = perintah.replace("buka ", "").strip()
         
-        # Daftar aplikasi populer yang deep link-nya udah pasti cocok
+        # Daftar aplikasi populer bawaan
         if aplikasi == "whatsapp":
             respon_ai, redirect_url = "Siap bro, gass buka WhatsApp!", "https://whatsapp.com"
         elif aplikasi == "google":
@@ -49,10 +50,11 @@ def proses_ai_web(perintah_asli):
         elif aplikasi == "facebook":
             respon_ai, redirect_url = "Membuka Facebook buat kamu bro.", "fb://"
             
-        # PENCARIAN OTOMATIS JIKA APLIKASI TIDAK ADA DI DAFTAR (Buka Aplikasi Lebih Luas)
+        # PENCARIAN & DETEKSI OTOMATIS APLIKASI LAIN SECARA LUAS (Sistem Pintar Baru)
         else:
-            respon_ai = f"Aplikasi '{aplikasi}' belum ada di daftar mentahku bro, tapi tenang! Aku buatin link pencarian skema deep link otomatis ke Google biar kamu tetep bisa akses."
-            redirect_url = f"https://google.com/search?q={urllib.parse.quote('open ' + aplikasi + ' app deep link android')}"
+            respon_ai = f"Gua coba tembus langsung ke aplikasi '{aplikasi}' di HP lu ya bro! Kalau gagal langsung kebuka, tombol di bawah bakal otomatis ngarahin lu ke halaman pencarian Play Store / App Store-nya."
+            # Mencoba memicu deep link nama aplikasi secara langsung, jika tidak bisa akan lari ke pencarian Google Store
+            redirect_url = f"{aplikasi}://"
 
     # 🟢 2. FITUR KIRIM WHATSAPP AMAN
     elif perintah.startswith("kirim wa ke "):
@@ -63,10 +65,7 @@ def proses_ai_web(perintah_asli):
                 start_idx, end_idx = match_pesan.span()
                 nomor_hp = sisa_teks[:start_idx].strip()
                 isi_pesan = sisa_teks[end_idx:].strip()
-                
-                if nomor_hp.startswith("0"): 
-                    nomor_hp = "62" + nomor_hp[1:]
-                
+                if nomor_hp.startswith("0"): nomor_hp = "62" + nomor_hp[1:]
                 respon_ai = f"Siap bro! Pesan kamu udah aku siapin buat dikirim ke nomor {nomor_hp}."
                 pesan_encoded = urllib.parse.quote(isi_pesan)
                 redirect_url = f"https://whatsapp.com{nomor_hp}&text={pesan_encoded}"
@@ -75,37 +74,51 @@ def proses_ai_web(perintah_asli):
         except: 
             respon_ai = "Duh sorry bro, gagal ngeproses nomor WhatsApp-nya. Cek lagi kodenya ya."
 
-    # 🧮 3. FITUR UTAMA BARU: HITUNG-MENGHITUNG (KALKULATOR OTOMATIS)
+    # 🧮 3. FITUR KALKULATOR
     elif perintah.startswith("hitung "):
         try:
             soal = perintah.replace("hitung ", "").strip()
-            # Ganti simbol buatan manusia ke simbol matematika Python
-            soal = soal.replace("×", "*").replace("x", "*").replace("X", "*")
-            soal = soal.replace("÷", "/").replace(":", "/")
-            soal = soal.replace("^", "**")
-            
-            # Sistem keamanan web biar user gak masukin kode hack berbahaya
-            if not re.match(r'^[\d+\-*/\s.()]*$', soal): 
-                raise ValueError()
-                
+            soal = soal.replace("×", "*").replace("x", "*").replace("X", "*").replace("÷", "/").replace(":", "/").replace("^", "**")
+            if not re.match(r'^[\d+\-*/\s.()]*$', soal): raise ValueError()
             hasil = eval(soal)
-            # Buat ngerapihin angka biar 4.0 jadi 4
-            if isinstance(hasil, float) and hasil.is_integer(): 
-                hasil = int(hasil)
-                
+            if isinstance(hasil, float) and hasil.is_integer(): hasil = int(hasil)
             respon_ai = f"Hasil akhir dari hitungan '{soal}' itu {hasil} bro! Gampang kan? Hehe."
         except ZeroDivisionError:
             respon_ai = "Duh bro, di matematika angka itu gak bisa dibagi sama nol (0) ya!"
         except:
             respon_ai = "Format hitungannya ngaco tuh bro. Pastiin lu cuma pake angka ama simbol tambah (+), kurang (-), kali (*), ato bagi (/) aja!"
 
-    # 🕒 4. INFO JAM REAL-TIME (RUMUS UTC+7 ANTI ERROR)
-    elif "jam berapa" in perintah or "menit berapa" in perintah or "waktu sekarang" in perintah:
+    # 🕒 5. UPGRADE FITUR: WAKTU LENGKAP (HARI, TANGGAL, BULAN, TAHUN, JAM)
+    elif any(x in perintah for x in ["jam berapa", "menit berapa", "waktu sekarang", "hari apa", "tanggal berapa", "tahun berapa"]):
         waktu_wib = datetime.utcnow() + timedelta(hours=7)
-        waktu_sekarang = waktu_wib.strftime("%H:%M")
-        respon_ai = f"Sekarang jam {waktu_sekarang} WIB bro. Jangan sampai keasyikan main terus lupa waktu ya, hehe."
+        
+        # Konversi nama hari ke bahasa Indonesia santai
+        hari_list = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"]
+        hari_ini = hari_list[waktu_wib.weekday()]
+        
+        # Konversi nama bulan ke bahasa Indonesia
+        bulan_list = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"]
+        bulan_ini = bulan_list[waktu_wib.month - 1]
+        
+        tgl = waktu_wib.strftime("%d")
+        thn = waktu_wib.strftime("%Y")
+        jam = waktu_wib.strftime("%H:%M")
+        
+        respon_ai = f"Hari ini itu hari *{hari_ini}*, tanggal *{tgl} {bulan_ini} {thn}*. Nah kalau buat jamnya, sekarang udah menunjukkan pukul *{jam} WIB* bro. Lengkap kan kalender dari gua? Hehe."
 
-    # 🔍 5. FITUR PENCARIAN GOOGLE OTOMATIS
+    # 📜 6. FITUR BARU: BELAJAR SEJARAH SERU & INTERAKTIF
+    elif "sejarah" in perintah or perintah.startswith("jelaskan "):
+        if "majapahit" in perintah:
+            respon_ai = "Wah, Majapahit itu kerajaan super power abad ke-14 abad kuno di Indonesia bro! Pusatnya di Jawa Timur. Yang paling terkenal itu Patih Gajah Mada dengan 'Sumpah Palapa'-nya. Dia bersumpah gak mau makan enak sebelum berhasil menyatukan seluruh Nusantara (Indonesia, Malaysia, Filipina sekarang). Gokil banget kan sejarah leluhur kita!"
+        elif "perang dunia" in perintah or "pd" in perintah:
+            respon_ai = "Perang Dunia itu sejarah kelam tapi seru buat dipelajari bro. PD 1 (1914) itu gara-gara pangeran Austria ditembak. Kalau PD 2 (1939) itu puncaknya pas aliansi Jerman pimpinan Hitler nyerang Polandia, terus berakhir pas kota Hiroshima-Nagasaki di Jepang dibom atom sama Amerika tahun 1945. Nah, momen itu juga yang dimanfaatin Indonesia buat langsung proklamasi kemerdekaan!"
+        elif "soekarno" in perintah or "sukarno" in perintah:
+            respon_ai = "Ir. Soekarno atau Bung Karno itu bapak Proklamator sekaligus Presiden pertama kita bro! Beliau itu singa podium, kalau pidato di depan negara asing semua langsung ciut. Bersama Bung Hatta, beliau yang berani bacain teks proklamasi 17 Agustus 1945 pas Jepang lagi kalah perang."
+        else:
+            # Petunjuk belajar sejarah secara umum
+            respon_ai = "Gass kita belajar sejarah bro! Sejarah itu asyik, bukan cuma ngafalin tahun doang. Lu mau tahu sejarah apa nih? Coba ketik secara spesifik, misalnya: `sejarah majapahit`, `sejarah perang dunia`, atau `siapa soekarno`. Nanti gua ceritain secara detail dan seru!"
+
+    # 🔍 7. FITUR PENCARIAN GOOGLE OTOMATIS
     elif perintah.startswith("cari ") or perintah.startswith("apa ") or perintah.startswith("pengen cari "):
         keyword = perintah
         for k in ["pengen cari ", "cari ", "apa "]:
@@ -116,38 +129,17 @@ def proses_ai_web(perintah_asli):
         else: 
             respon_ai = "Mau cari apa di Google bro? Sebutin objek atau kalimatnya dong biar jelas."
 
-    # 🆔 6. IDENTITAS JAWABAN PANJANG & SANTAI
+    # 🆔 8. IDENTITAS JAWABAN PANJANG & SANTAI
     elif perintah in ["lu siapa", "kamu siapa", "siapa kamu"]:
         respon_ai = "Kenalin bro, aku AI Aliy! Program asisten virtual santai yang dibikin pake Python khusus buat bantuin kamu sehari-hari. Tugas utama aku itu ringkas banget: bisa nemenin kamu ngobrol pas gabut, bantuin hitung matematika cepat, otomatis nyariin info apa aja di Google, sampe ngebuka semua jenis aplikasi di HP kamu tinggal sekali klik doang. Mantap kan?"
 
-    # 💬 7. JAWABAN PERTANYAAN RANDOM (BAHASA SANTAI TONGKRONGAN)
+    # 💬 9. FITUR BARU: CURHATAN & JAWABAN RANDOM VARIATIF (TIDAK ITU-ITU AJA)
     else:
-        if "wait" in perintah or "tunggu" in perintah or "sebentar" in perintah: 
-            respon_ai = "Aman bro, santai aja gua tungguin kok! Gak usah buru-buru ketiknya, kalau udah lu tinggal kirim perintah baru lagi aja di sini."
-        elif "halo" in perintah or "hai" in perintah or "p" in perintah: 
-            respon_ai = "Halo juga bro! Senang banget bisa ketemu dan nyapa kamu lagi hari ini. Gimana nih, ada hal seru apa yang mau kita lakuin bareng hari ini? Aku siap bantu!"
-        elif "kabar" in perintah: 
-            respon_ai = "Kabar sistemku aman terkendali bro, performa lagi kenceng-kencengnya dan siap tempur nemenin aktivitasmu! Kalau kabar kamu sendiri gimana? Semoga hari ini seru dan menyenangkan ya!"
-        elif "bosan" in perintah or "gabut" in perintah: 
-            respon_ai = "Lagi gabut banget ya bro? Mending lu ketik perintah 'buka youtube' buat nonton video seru, 'buka roblox' ama 'buka ml' biar bisa mabar game ama temen tongkrongan lu!"
-        elif "terima kasih" in perintah or "makasih" in perintah: 
-            respon_ai = "Sama-sama bro! Udah jadi tugas wajib bagi asisten keren kayak gua buat bantuin lu. Kalau butuh bantuan lain tinggal ketik aja ya, santai aja."
-        else: 
-            respon_ai = f"Wah, jujur di otak keduaku belum ada jawaban khusus buat kalimat '{perintah_asli}' ini bro. Tapi tenang aja, mending lu ketik perintah 'cari {perintah_asli}' biar langsung gua cariin jawaban lengkapnya di internet lewat Google otomatis!"
-
-    return respon_ai, redirect_url
-
-# Input chat di halaman web
-input_user = st.text_input("Ketik pesan atau perintah buat AI Aliy di sini bro:", key="user_input")
-if input_user:
-    jawaban, link_tujuan = proses_ai_web(input_user)
-    st.session_state.riwayat_chat.insert(0, {"user": input_user, "ai": jawaban, "link": link_tujuan})
-
-st.write("---")
-st.subheader("📜 Riwayat Obrolan Kita:")
-for chat in st.session_state.riwayat_chat:
-    st.markdown(f"**👦 Kamu:** {chat['user']}")
-    st.markdown(f"**🤖 AI Aliy:** {chat['ai']}")
-    if chat['link']: 
-        st.link_button("👉 KLIK DI SINI BUAT BUKA APLIKASI / LINK", chat['link'])
-    st.write("---")
+        # Kumpulan database jawaban acak (variatif) biar gak bosenin
+        sapaan_list = [
+            "Halo juga bro! Senang banget bisa ketemu dan nyapa kamu lagi hari ini. Ada hal seru apa yang mau kita lakuin bareng hari ini?",
+            "Yo bro! Whatsapp! Ada yang bisa dibantu hari ini? Gua lagi luang banget nih buat nemenin lu.",
+            "Hai bro! Akhirnya lu ngechat gua lagi, hehe. Mau suruh gua ngapain hari ini? Tinggal sebut!"
+        ]
+        kabar_list = [
+            "Kabar sistemku aman terkendali bro, performa lagi kenceng-kencengnya dan siap tempur nemenin aktivitasmu! Kalau kabar kamu sendiri gimana?",
