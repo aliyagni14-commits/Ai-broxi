@@ -75,9 +75,12 @@ def proses_ai_web(perintah_asli):
         except: 
             respon_ai = "Duh sorry bro, gagal ngeproses nomor WhatsApp-nya. Cek lagi kodenya ya."
 
-    # 🕒 3. INFO JAM REAL-TIME
+        # 🕒 INFO JAM REAL-TIME (SUDAH DI-FIX BIAR AKURAT JAM INDONESIA)
     elif "jam berapa" in perintah or "menit berapa" in perintah or "waktu sekarang" in perintah:
-        respon_ai = f"Sekarang jam {datetime.now().strftime('%H:%M')} WIB bro. Jangan sampai keasyikan main terus lupa waktu ya, hehe."
+        import pytz
+        zona_waktu = pytz.timezone('Asia/Jakarta')
+        waktu_sekarang = datetime.now(zona_waktu).strftime("%H:%M")
+        respon_ai = f"Sekarang jam {waktu_sekarang} WIB bro. Jangan sampai keasyikan main terus lupa waktu ya, hehe."
 
     # 🔍 4. FITUR PENCARIAN GOOGLE OTOMATIS
     elif perintah.startswith("cari ") or perintah.startswith("apa ") or perintah.startswith("pengen cari "):
